@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Patch Changes
+
+- 2392a12: Fix broken GitHub links in package README (wrong username on npm package page)
+
 ## 0.1.1
 
 ### Patch Changes

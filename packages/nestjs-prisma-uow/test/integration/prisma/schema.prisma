@@ -1,0 +1,36 @@
+// Minimal Prisma schema for integration tests.
+// Models are intentionally simple — the tests prove commit and rollback
+// behavior across multiple models inside a PrismaUnitOfWork transaction.
+//
+// To prepare a test database:
+//   1. Create (or point to) a PostgreSQL database
+//   2. Set DATABASE_URL=<your-connection-string>
+//   3. Run: npx prisma db push --schema=test/integration/prisma/schema.prisma
+//
+// Tests skip automatically when DATABASE_URL is unset.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  logs      AuditLog[]
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}

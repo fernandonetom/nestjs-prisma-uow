@@ -3,7 +3,7 @@
 NestJS Prisma Unit of Work — transactional boundaries for DDD-style repositories.
 
 [![npm](https://img.shields.io/npm/v/@feneto/nestjs-prisma-uow)](https://www.npmjs.com/package/@feneto/nestjs-prisma-uow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/feneto/nestjs-prisma-uow/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/LICENSE)
 
 ## Install
 
@@ -13,7 +13,7 @@ npm install @feneto/nestjs-prisma-uow
 
 ## Documentation
 
-See the [full documentation](https://github.com/feneto/nestjs-prisma-uow#readme) on GitHub.
+See the [full documentation](https://github.com/fernandonetom/nestjs-prisma-uow#readme) on GitHub.
 
 ## License
 

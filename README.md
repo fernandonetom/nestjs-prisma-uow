@@ -3,7 +3,7 @@
 NestJS Prisma Unit of Work — transactional boundaries for DDD-style repositories.
 
 [![npm](https://img.shields.io/npm/v/@feneto/nestjs-prisma-uow)](https://www.npmjs.com/package/@feneto/nestjs-prisma-uow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/LICENSE)
 
 ## Features
 
@@ -111,16 +111,16 @@ expect(uow.calls).toHaveLength(1);
 
 ## Example App
 
-See [`examples/shop-api/`](./examples/shop-api/) for a full NestJS app with
+See [`examples/shop-api/`](https://github.com/fernandonetom/nestjs-prisma-uow/tree/main/examples/shop-api) for a full NestJS app with
 Order + OrderItem models, docker-compose PostgreSQL, and UoW rollback demo.
 
 ## Documentation
 
-- [Install & Setup](./docs/install.md)
-- [Repository + UoW Pattern](./docs/repository-uow.md)
-- [Testing Helpers](./docs/testing.md)
-- [Example Walkthrough](./docs/example-walkthrough.md)
+- [Install & Setup](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/docs/install.md)
+- [Repository + UoW Pattern](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/docs/repository-uow.md)
+- [Testing Helpers](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/docs/testing.md)
+- [Example Walkthrough](https://github.com/fernandonetom/nestjs-prisma-uow/blob/main/docs/example-walkthrough.md)
 
 ## License
 
-MIT © [Fernando Neto](./LICENSE)
+MIT © [Fernando Neto](https://github.com/fernandonetom)

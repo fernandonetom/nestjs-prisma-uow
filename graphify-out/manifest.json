@@ -1,0 +1,327 @@
+{
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/opencode.json": {
+    "mtime": 1784817887.055213,
+    "ast_hash": "21755d530b76ba15e53c36687dda3ab0",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/package.json": {
+    "mtime": 1784817900.2012024,
+    "ast_hash": "04c9f7f7073430429cd222c752f78510",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/opencode.json": {
+    "mtime": 1784817896.2746959,
+    "ast_hash": "e5f74d14a81702b55bdf53b33ec991d7",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/plugins/leanharness-guardrails.js": {
+    "mtime": 1784817887.0615644,
+    "ast_hash": "c25f6fbffcadba5b1ae42811b70e3785",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/plugins/graphify.js": {
+    "mtime": 1784817887.441221,
+    "ast_hash": "64ccd3c03dbfe0980b6095766f5c4e52",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/plugins/shared.js": {
+    "mtime": 1784817887.061324,
+    "ast_hash": "7d8750d74d7a6ce9e0752c924f4c07cf",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/settings.json": {
+    "mtime": 1784817887.063412,
+    "ast_hash": "2d2a7ecb819a63c9c57e5484b4fcc132",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/settings.local.json": {
+    "mtime": 1784817887.0639346,
+    "ast_hash": "9ce4a0021920189446f505bb8f0cdf82",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/hooks/leanharness-hooks.json": {
+    "mtime": 1784817887.0644085,
+    "ast_hash": "50926e61f44264c401ce85da78b07715",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/state.json": {
+    "mtime": 1784819039.0372033,
+    "ast_hash": "b905607d822abe9037b12e8eea34c294",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/scripts/hooks/post-tool-use.js": {
+    "mtime": 1784817887.0698967,
+    "ast_hash": "bf58660c0725e18139182053cb1cf9bd",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/scripts/hooks/pre-tool-use.js": {
+    "mtime": 1784817887.0697036,
+    "ast_hash": "50d63b006026a26425818d6a2edabcea",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/scripts/hooks/session-end.js": {
+    "mtime": 1784817887.070162,
+    "ast_hash": "c6c381609d4c3132b937cd252441c027",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/scripts/hooks/package.json": {
+    "mtime": 1784817887.0692484,
+    "ast_hash": "73dcb1213173170d536f9bdd4ee86794",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/scripts/hooks/shared.js": {
+    "mtime": 1784817887.0694985,
+    "ast_hash": "aa55fb70fc6ae86b074518798d63e8bf",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/boundary.json": {
+    "mtime": 1784817887.0483496,
+    "ast_hash": "e19e94cbdbc5eb55fd4ab69c934c5e88",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/AGENTS.md": {
+    "mtime": 1784817887.4410663,
+    "ast_hash": "62c05a2bf20bf036a0b2633478663e64",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/README.md": {
+    "mtime": 1784817887.0554554,
+    "ast_hash": "423da6a931f4849e4274d6d699b16e4f",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-builder.md": {
+    "mtime": 1784817887.056228,
+    "ast_hash": "e9504d5aef7c246527ba9f75f1a84b78",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-builder-fix.md": {
+    "mtime": 1784817887.056464,
+    "ast_hash": "33e36024fe5d100ac381f4f892ccc007",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-reviewer.md": {
+    "mtime": 1784817887.056699,
+    "ast_hash": "16c16dc6fdd55133bb83d8f403750ef6",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-compressor.md": {
+    "mtime": 1784817887.057162,
+    "ast_hash": "5ba1db8e3d88c9620abda08b190899d3",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-verifier.md": {
+    "mtime": 1784817887.056932,
+    "ast_hash": "cd35ba817c31150c8cad7e71e55a0f6a",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/agents/lh-scout.md": {
+    "mtime": 1784817887.0559886,
+    "ast_hash": "86e62ae7bfb13c9e1070039e987a44bf",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-plan.md": {
+    "mtime": 1784817887.059522,
+    "ast_hash": "a3c1015bb05039d11eec6effa16d9a28",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-do.md": {
+    "mtime": 1784817887.0608048,
+    "ast_hash": "db64c254d5a7b2b5ce88a262a6b63a07",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-spec.md": {
+    "mtime": 1784817887.058961,
+    "ast_hash": "ebdbbe10efb7f54252f6226845b00894",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-build.md": {
+    "mtime": 1784817887.0598216,
+    "ast_hash": "4086ee9847ec08de0e02ca84f9cc4538",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-status.md": {
+    "mtime": 1784817887.060532,
+    "ast_hash": "2a7cb6c5fa6a129cf03be991ac4e868f",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-check.md": {
+    "mtime": 1784817887.060259,
+    "ast_hash": "8f01a2686e9edd9dd833a18a9558ba09",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.opencode/commands/lh-discover.md": {
+    "mtime": 1784819160.0759401,
+    "ast_hash": "9f700ffa7acbb3c7ead7f736607feee0",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/README.md": {
+    "mtime": 1784817887.064186,
+    "ast_hash": "1058e574f7586eae1edcdfb59f46d8af",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-builder.md": {
+    "mtime": 1784817887.065238,
+    "ast_hash": "4a4a4b12971404b99fa31590d91ebc59",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-builder-fix.md": {
+    "mtime": 1784817887.065449,
+    "ast_hash": "acec9f6177ce2141e5dc1a70a8c32f93",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-reviewer.md": {
+    "mtime": 1784817887.0656734,
+    "ast_hash": "28c1a33faa5240b5dc187fa074196870",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-compressor.md": {
+    "mtime": 1784817887.0662813,
+    "ast_hash": "210c20f3262f35d064a689debfa98e64",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-verifier.md": {
+    "mtime": 1784817887.0659707,
+    "ast_hash": "b2149d05e372f7c8a2e241f855c4b00c",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/agents/lh-scout.md": {
+    "mtime": 1784817887.064983,
+    "ast_hash": "6c7f972a6ab6c459015a6f69b9399b48",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-status/SKILL.md": {
+    "mtime": 1784817887.0685544,
+    "ast_hash": "cf2a897a1fa0416f62411ffde8013003",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-discover/SKILL.md": {
+    "mtime": 1784817887.0676324,
+    "ast_hash": "a8b8a4d123800b5a1f2e72e064762a63",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-spec/SKILL.md": {
+    "mtime": 1784817887.0674,
+    "ast_hash": "9a3204f6c80b33960235f7055c49b54d",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-plan/SKILL.md": {
+    "mtime": 1784817887.0678558,
+    "ast_hash": "451dae1a9a5bb49263277d06b0d1287c",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-build/SKILL.md": {
+    "mtime": 1784817887.068105,
+    "ast_hash": "fc6a535ffdc27225f959d3f2eade6886",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-check/SKILL.md": {
+    "mtime": 1784817887.0683422,
+    "ast_hash": "0b4f31f54492aff41cf762d7ca409554",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.claude/skills/lh-do/SKILL.md": {
+    "mtime": 1784817887.0671463,
+    "ast_hash": "b29f263f6c8147c7635d04e58a4120fd",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/config.yml": {
+    "mtime": 1784817887.040741,
+    "ast_hash": "522c41eb5fd818b6177ec45fa81abda3",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/memory/cave.md": {
+    "mtime": 1784817887.0424802,
+    "ast_hash": "12831c16b7f8ce5cfe3a233f5dae37ac",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/memory/project.md": {
+    "mtime": 1784817887.041613,
+    "ast_hash": "fb1bc7dfbb9034f7b657a84ab3fba877",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/memory/patterns.md": {
+    "mtime": 1784817887.0422256,
+    "ast_hash": "3a375545bfa2c578eb73c60239408238",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/memory/decisions.md": {
+    "mtime": 1784817887.0419562,
+    "ast_hash": "900fcc5b2ff50d1fab25cfa9615f8222",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/features/F001-nestjs-prisma-uow/spec.md": {
+    "mtime": 1784819037.5024602,
+    "ast_hash": "5b77284dd3e5bf6235ef5eff74a739c3",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/policies/opencode.yml": {
+    "mtime": 1784817887.0618417,
+    "ast_hash": "0a7d531ce75c29f7a789b65bd059503d",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/policies/claude-code.yml": {
+    "mtime": 1784817887.07039,
+    "ast_hash": "5366219331cb5e98a3dd070aaa6845e8",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/policies/risk-gates.yml": {
+    "mtime": 1784817887.0528758,
+    "ast_hash": "93424ac43d3bcf51415d25eedd18a1c9",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/policies/commands.yml": {
+    "mtime": 1784817887.0538545,
+    "ast_hash": "2a889584cab198e9cd3fef26424d7c8d",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/policies/boundary.yml": {
+    "mtime": 1784817887.0535843,
+    "ast_hash": "bf3e8cac022d2d81bdefe40e94b8918a",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/result.md": {
+    "mtime": 1784817887.0517623,
+    "ast_hash": "3c738d61519771d63526dbddd0dd343e",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/cavebus-message.md": {
+    "mtime": 1784817887.0508852,
+    "ast_hash": "3aa2731f39c261f5a923ae862f73210f",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/task-summary.md": {
+    "mtime": 1784817887.0521672,
+    "ast_hash": "70478336541c272ec277388cff3019ee",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/tasks.md": {
+    "mtime": 1784817887.0523553,
+    "ast_hash": "47d6af9e7c6efb30eff62f47b546190d",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/discovery.md": {
+    "mtime": 1784817887.0513105,
+    "ast_hash": "9eea80507d39e72f899b9037de8902dc",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/plan.md": {
+    "mtime": 1784817887.0515287,
+    "ast_hash": "2eca8031243ad73f723acedb550a6b9a",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/spec.md": {
+    "mtime": 1784817887.0519783,
+    "ast_hash": "968846dbcd9461349907b170a54f65a5",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/templates/checks.md": {
+    "mtime": 1784817887.0510933,
+    "ast_hash": "97c46f9483f7b203c00d8fb5cd7f1e43",
+    "semantic_hash": ""
+  },
+  "/Users/feneto/Repositories/personal/nestjs-prisma-unit-of-work/.lh/protocols/cavebus.yml": {
+    "mtime": 1784817887.052637,
+    "ast_hash": "e30de0cae0f145b99be41437f82497e6",
+    "semantic_hash": ""
+  }
+}

@@ -49,6 +49,11 @@ jobs:
 
       - run: pnpm --filter @feneto/nestjs-prisma-uow pack --dry-run
 
+      - name: Push integration test schema
+        run: pnpm --filter @feneto/nestjs-prisma-uow exec prisma db push --schema=test/integration/prisma/schema.prisma --skip-generate --accept-data-loss
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+
       - name: Integration tests
         run: pnpm --filter @feneto/nestjs-prisma-uow test:integration
         env:

@@ -29,6 +29,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm --filter shop-api prisma:generate
+
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v1
         with:

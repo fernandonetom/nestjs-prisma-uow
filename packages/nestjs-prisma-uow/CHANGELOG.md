@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 8d1f69d: Fix README links to absolute GitHub URLs for npm compatibility and add repository/homepage/bugs fields to package.json
+
 ## 0.1.0
 
 ### Minor Changes

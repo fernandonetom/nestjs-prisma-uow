@@ -37,6 +37,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm --filter shop-api prisma:generate
+
       - run: pnpm -r build
 
       - run: pnpm -r typecheck

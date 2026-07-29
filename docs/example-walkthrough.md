@@ -1,15 +1,16 @@
 # Example Walkthrough — Shop API
 
-This guide walks through the `examples/shop-api` application, a runnable NestJS app that demonstrates `@feneto/nestjs-prisma-uow` with a real PostgreSQL database.
+This guide walks through the `examples/shop-api` application, a runnable NestJS app that demonstrates `@feneto/nestjs-prisma-uow` with a real PostgreSQL database using the DDD repository pattern.
 
 ## What it does
 
-The example is a minimal order management API with:
+The example is an order management API demonstrating cross-aggregate transactional writes:
 
-- **Order** + **OrderItem** models (1-to-many)
+- **4 aggregate roots:** Order, OrderItem, Product, User — each with its own repository interface + DI-injected implementation
 - Multi-aggregate writes inside a single transaction
 - A rollback demo endpoint that aborts the transaction mid-flight
 - Read endpoints using the root (non-transactional) client
+- Full DDD layering: controller → service → repository → Prisma
 
 ## Prerequisites
 
@@ -31,8 +32,6 @@ docker compose up -d
 ```bash
 cp .env.example .env
 ```
-
-The `.env` file points to `postgresql://postgres:postgres@localhost:5432/shop`. You can customize it.
 
 ### 3. Install dependencies
 
@@ -84,7 +83,7 @@ curl -X POST http://localhost:3000/orders \
 
 **Response:** `{ "id": 1 }`
 
-The order and both items are persisted atomically. If any item insert fails, the entire transaction rolls back.
+The order and both items are persisted atomically across two aggregate repositories (`OrdersRepository` + `OrderItemsRepository`). If any item insert fails, the entire transaction rolls back.
 
 ### `POST /orders/rollback-demo` — Trigger a rollback
 
@@ -102,7 +101,20 @@ curl -X POST http://localhost:3000/orders/rollback-demo \
 
 **Response:** `400 — "Rollback demo — order aborted. All writes were rolled back."`
 
-The service creates the order, then checks the email. When it matches `rollback@example.com`, it throws an error. Prisma rolls back the entire transaction — no order or items remain in the database.
+The service creates the order and items via the injected repositories, then checks the email. When it matches `rollback@example.com`, it throws an error. Prisma rolls back the entire transaction — no order or items remain in the database.
+
+### `POST /orders/batch` — Two orders in one transaction
+
+```bash
+curl -X POST http://localhost:3000/orders/batch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "order1": { "customer": "Alice", "email": "alice@example.com", "items": [{"product":"A","quantity":1,"price":100}] },
+    "order2": { "customer": "Bob", "email": "bob@example.com", "items": [{"product":"B","quantity":1,"price":200}] }
+  }'
+```
+
+Both orders + items commit atomically or roll back together.
 
 ### `GET /orders/:id` — Get an order
 
@@ -126,21 +138,46 @@ Returns all orders for the named customer.
 
 ```
 examples/shop-api/
-├── docker-compose.yml          # PostgreSQL service
-├── .env.example                # Environment template
+├── docker-compose.yml
+├── .env.example
 ├── prisma/
-│   └── schema.prisma           # Order + OrderItem models
+│   └── schema.prisma           # Order, OrderItem, Product, User models
 └── src/
-    ├── main.ts                 # NestJS bootstrap
-    ├── app.module.ts           # Root module wiring
-    ├── prisma/
-    │   ├── prisma.service.ts   # Consumer-owned PrismaClient
-    │   └── prisma.module.ts    # Binds to PRISMA_CLIENT token
-    └── orders/
-        ├── orders.controller.ts # HTTP endpoints
-        ├── orders.service.ts   # Orchestration with UoW
-        ├── orders.repository.ts # Data access (no base class)
-        └── orders.module.ts    # Feature module
+    ├── main.ts
+    ├── app.module.ts           # Root module
+    ├── domain/                 # — Domain layer —
+    │   ├── orders/
+    │   │   ├── order.entity.ts               # Order aggregate root
+    │   │   └── i-order.repository.ts         # IOrderRepository contract
+    │   ├── order-items/
+    │   │   ├── order-item.entity.ts          # OrderItem entity
+    │   │   └── i-order-item.repository.ts    # IOrderItemRepository contract
+    │   ├── products/
+    │   │   ├── product.entity.ts             # Product entity
+    │   │   └── i-product.repository.ts       # IProductRepository contract
+    │   └── users/
+    │       ├── user.entity.ts                # User entity
+    │       └── i-user.repository.ts          # IUserRepository contract
+    ├── application/            # — Application layer —
+    │   ├── dtos/
+    │   │   └── create-order.dto.ts
+    │   └── services/
+    │       ├── orders.service.ts             # Cross-aggregate orchestration
+    │       ├── products.service.ts
+    │       └── users.service.ts
+    ├── infrastructure/         # — Infrastructure layer —
+    │   ├── prisma/
+    │   │   ├── prisma.service.ts             # Consumer-owned PrismaClient
+    │   │   └── prisma.module.ts
+    │   └── repositories/
+    │       ├── orders.repository.ts          # IOrderRepository impl
+    │       ├── order-items.repository.ts     # IOrderItemRepository impl
+    │       ├── products.repository.ts        # IProductRepository impl
+    │       └── users.repository.ts           # IUserRepository impl
+    └── presentation/           # — Presentation layer —
+        ├── orders.module.ts                  # Wires all layers
+        └── controllers/
+            └── orders.controller.ts          # HTTP endpoints
 ```
 
 ### Consumer-owned Prisma stack
@@ -148,13 +185,13 @@ examples/shop-api/
 The example owns its Prisma setup. The library only provides the Unit of Work — **not** a Prisma service:
 
 ```ts
-// src/prisma/prisma.service.ts
+// src/infrastructure/prisma/prisma.service.ts
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() { await this.$connect(); }
   async onModuleDestroy() { await this.$disconnect(); }
 }
 
-// src/prisma/prisma.module.ts
+// src/infrastructure/prisma/prisma.module.ts
 @Module({
   providers: [{ provide: PRISMA_CLIENT, useClass: PrismaService }],
   exports: [PRISMA_CLIENT],
@@ -164,7 +201,7 @@ export class PrismaModule {}
 
 ### Module wiring
 
-`AppModule` imports `PrismaModule` (the consumer's client) and passes it to `PrismaUnitOfWorkModule.forRoot()`:
+`AppModule` imports `PrismaModule` and passes it to `PrismaUnitOfWorkModule.forRoot()`, plus the feature module:
 
 ```ts
 @Module({
@@ -180,34 +217,85 @@ export class PrismaModule {}
 export class AppModule {}
 ```
 
-### Service + Repository
+### Repository pattern (DDD)
 
-The service injects `PrismaUnitOfWork<PrismaClient>` and creates repositories inside `do()`:
+Each aggregate root has a repository interface defining its contract in the **domain layer**, and a concrete `@Injectable()` implementation in the **infrastructure layer** that injects `PrismaUnitOfWork`:
 
 ```ts
+// Domain — contract (src/domain/orders/i-order.repository.ts)
+export interface IOrderRepository {
+  save(customer: string, email: string): Promise<Order>;
+  findById(id: number): Promise<Order | null>;
+}
+
+// Infrastructure — implementation (src/infrastructure/repositories/orders.repository.ts)
 @Injectable()
-export class OrdersService {
+export class OrdersRepository implements IOrderRepository {
   constructor(private readonly uow: PrismaUnitOfWork<PrismaClient>) {}
 
-  async createOrder(dto: CreateOrderDto) {
-    return this.uow.do(async (tx) => {
-      const repo = new OrdersRepository(tx);
-      return repo.createOrder(dto);
-    });
+  async save(customer: string, email: string): Promise<Order> {
+    const client = this.uow.transaction;
+    const result = await client.order.create({ data: { customer, email } });
+    return new Order(result.id, result.customer, result.email, result.createdAt);
+  }
+
+  async findById(id: number): Promise<Order | null> {
+    const client = this.uow.transaction;
+    const result = await client.order.findUnique({ ... });
+    if (!result) return null;
+    return new Order(result.id, result.customer, result.email, result.createdAt);
   }
 }
 ```
 
-The repository is a plain class (no base class from the library):
+### Domain entities
+
+Each aggregate root has a pure domain entity class — no ORM annotations, no infrastructure dependencies:
 
 ```ts
-export class OrdersRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+// src/domain/orders/order.entity.ts
+export class Order {
+  private _items: OrderItem[] = [];
 
-  async createOrder(params: { ... }) {
-    return this.prisma.order.create({
-      data: { ... },
-      include: { items: true },
+  constructor(
+    public readonly id: number,
+    public readonly customer: string,
+    public readonly email: string,
+    public readonly createdAt: Date,
+  ) {}
+
+  get items(): ReadonlyArray<OrderItem> { return this._items; }
+  addItem(item: OrderItem): void { this._items.push(item); }
+}
+```
+
+### Service orchestration
+
+The service (application layer) injects multiple repositories and the Unit of Work. It defines a single `uow.do()` boundary — all repos inside it share the same transaction:
+
+```ts
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly orderRepo: OrdersRepository,
+    private readonly itemRepo: OrderItemsRepository,
+    private readonly productRepo: ProductsRepository,
+    private readonly uow: PrismaUnitOfWork<PrismaClient>,
+  ) {}
+
+  async createOrder(dto: CreateOrderDto) {
+    // Validate products exist (cross-aggregate read — outside tx)
+    const productNames = [...new Set(dto.items.map(i => i.product))];
+    const existing = await this.productRepo.findByNames(productNames);
+    if (existing.length !== productNames.length) {
+      throw new BadRequestException('Some products not found');
+    }
+
+    // Create order + items atomically
+    return this.uow.do(async () => {
+      const order = await this.orderRepo.save(dto.customer, dto.email);
+      await this.itemRepo.createItems(order.id, dto.items);
+      return order;
     });
   }
 }
@@ -219,9 +307,9 @@ The `POST /orders/rollback-demo` endpoint demonstrates what happens when a trans
 
 ```ts
 async createOrderWithRollbackDemo(dto: CreateOrderDto) {
-  return this.uow.do(async (tx) => {
-    const repo = new OrdersRepository(tx);
-    const order = await repo.createOrder(dto);
+  return this.uow.do(async () => {
+    const order = await this.orderRepo.save(dto.customer, dto.email);
+    await this.itemRepo.createItems(order.id, dto.items);
 
     if (dto.email === 'rollback@example.com') {
       throw new Error('Rollback demo — order aborted');
@@ -232,7 +320,7 @@ async createOrderWithRollbackDemo(dto: CreateOrderDto) {
 }
 ```
 
-Even though `createOrder` completed successfully, the thrown error causes Prisma to roll back the entire transaction. No partial data is left behind.
+Even though `save` and `createItems` completed successfully inside the transaction, the thrown error causes Prisma to roll back everything. No partial data is left in the database.
 
 ## Clean up
 

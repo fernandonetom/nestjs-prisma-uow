@@ -1,6 +1,6 @@
 {
   "name": "@feneto/nestjs-prisma-uow",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "NestJS Prisma Unit of Work — transactional boundaries for DDD-style repositories",
   "license": "MIT",
   "author": "Fernando Neto",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- 8a544c3: Refactor example app to full DDD layered architecture (domain/application/infrastructure/presentation) with DI-injected repositories sharing a single Unit of Work transaction. Add Product + User aggregate roots, batch create/rollback endpoints, and comprehensive documentation updates covering the DDD repository pattern, cross-aggregate orchestration, and testing DI-injected repositories.
+
 ## 0.1.2
 
 ### Patch Changes

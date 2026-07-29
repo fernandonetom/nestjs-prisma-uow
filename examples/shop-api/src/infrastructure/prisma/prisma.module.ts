@@ -7,9 +7,7 @@ import { PrismaService } from './prisma.service';
  * so the Unit of Work module can inject it.
  */
 @Module({
-  providers: [
-    { provide: PRISMA_CLIENT, useClass: PrismaService },
-  ],
+  providers: [{ provide: PRISMA_CLIENT, useClass: PrismaService }],
   exports: [PRISMA_CLIENT],
 })
 export class PrismaModule {}

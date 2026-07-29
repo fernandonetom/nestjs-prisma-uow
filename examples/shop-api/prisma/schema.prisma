@@ -1,5 +1,5 @@
 // Example shop API — Prisma schema
-// Models: Order + OrderItem (1-to-many)
+// Aggregate roots: Order, OrderItem, Product, User (4 total)
 generator client {
   provider = "prisma-client-js"
 }
@@ -24,4 +24,16 @@ model OrderItem {
   quantity Int
   price    Int
   order    Order   @relation(fields: [orderId], references: [id])
+}
+
+model Product {
+  id    Int    @id @default(autoincrement())
+  name  String
+  price Int
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  name  String
 }

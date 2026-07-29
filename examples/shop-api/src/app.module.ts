@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PrismaUnitOfWorkModule } from '@feneto/nestjs-prisma-uow';
-import { PrismaModule } from './prisma/prisma.module';
-import { OrdersModule } from './orders/orders.module';
+
+// Infrastructure
+import { PrismaModule } from './infrastructure/prisma/prisma.module';
+
+// Presentation (wires all layers)
+import { OrdersModule } from './presentation/orders.module';
 
 @Module({
   imports: [
@@ -14,7 +18,7 @@ import { OrdersModule } from './orders/orders.module';
       transactionOptions: { timeout: 5000 },
     }),
 
-    // 3. Feature modules
+    // 3. Feature modules — presentation layer wires all dependencies
     OrdersModule,
   ],
 })

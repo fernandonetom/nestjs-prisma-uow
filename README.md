@@ -9,6 +9,7 @@ NestJS Prisma Unit of Work — transactional boundaries for DDD-style repositori
 
 - **`IUnitOfWork<TClient>`** interface with `do(fn)` + `transaction` accessor
 - **`PrismaUnitOfWork`** — Prisma interactive `$transaction` wrapper
+- **DDD repository pattern** — DI-injected repos share one transaction across aggregates
 - **Nested `do()` reuse** — no redundant transactions
 - **ALS isolation** — `AsyncLocalStorage` per async chain, safe for singletons
 - **NestJS module** — `forRoot` / `forRootAsync` with default tx options
@@ -83,6 +84,31 @@ export class OrdersService {
 }
 ```
 
+### 4. Go DDD — inject multiple repos into one UoW
+
+```ts
+@Injectable()
+export class OrdersService {
+  constructor(
+    private readonly orderRepo: OrdersRepository,       // DI-injected
+    private readonly itemRepo: OrderItemsRepository,     // DI-injected
+    private readonly uow: PrismaUnitOfWork<PrismaClient>,
+  ) {}
+
+  async createOrder(dto: CreateOrderDto) {
+    return this.uow.do(async () => {
+      // Both repos share the same transaction automatically
+      const order = await this.orderRepo.createOrder(dto);
+      await this.itemRepo.createItems(order.id, dto.items);
+      return order;
+    });
+  }
+}
+```
+
+Repositories inject the UoW and use `this.uow.transaction` — which auto-resolves
+to the active transactional client inside `do()` or the root client outside.
+
 ## Transaction Options
 
 Set defaults on the module or override per call:
@@ -112,7 +138,8 @@ expect(uow.calls).toHaveLength(1);
 ## Example App
 
 See [`examples/shop-api/`](https://github.com/fernandonetom/nestjs-prisma-uow/tree/main/examples/shop-api) for a full NestJS app with
-Order + OrderItem models, docker-compose PostgreSQL, and UoW rollback demo.
+Order + OrderItem + Product + User models, docker-compose PostgreSQL, DDD-style repository interfaces,
+DI-injected repositories, and UoW rollback demo.
 
 ## Documentation
 

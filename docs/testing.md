@@ -121,6 +121,56 @@ describe('OrdersService', () => {
 });
 ```
 
+## Testing DI-injected repositories
+
+With the DDD repository pattern (repositories inject `PrismaUnitOfWork` via DI), you provide both the mock UoW and concrete repository instances to the testing module:
+
+```ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaUnitOfWork } from '@feneto/nestjs-prisma-uow';
+import { MockUnitOfWork } from '@feneto/nestjs-prisma-uow/testing';
+import { OrdersService } from './orders.service';
+import { OrdersRepository } from './orders.repository';
+import { OrderItemsRepository } from '../order-items/order-items.repository';
+
+describe('OrdersService (DDD pattern)', () => {
+  let service: OrdersService;
+  let uow: MockUnitOfWork;
+
+  beforeEach(async () => {
+    uow = new MockUnitOfWork();
+
+    // Repositories inject UoW → pass the same mock instance
+    const orderRepo = new OrdersRepository(uow as any);
+    const itemRepo = new OrderItemsRepository(uow as any);
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        // Provide repositories as concrete values
+        { provide: OrdersRepository, useValue: orderRepo },
+        { provide: OrderItemsRepository, useValue: itemRepo },
+        // Provide the UoW mock
+        { provide: PrismaUnitOfWork, useValue: uow },
+        OrdersService,
+      ],
+    }).compile();
+
+    service = module.get(OrdersService);
+  });
+
+  it('should create order + items inside a single transaction', async () => {
+    await service.createOrder({
+      customer: 'Alice',
+      email: 'alice@example.com',
+      items: [{ product: 'Widget', quantity: 1, price: 100 }],
+    });
+
+    // Assert exactly one transaction was started
+    expect(uow.calls).toHaveLength(1);
+  });
+});
+```
+
 ## API reference
 
 ### Constructor

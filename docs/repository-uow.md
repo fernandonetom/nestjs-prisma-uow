@@ -1,98 +1,232 @@
 # Repository + Unit of Work Pattern
 
-This guide shows how to combine the repository pattern with the Unit of Work for transactional, DDD-style code.
+This guide shows how to combine the DDD repository pattern with the Unit of Work for transactional, cross-aggregate consistency.
 
 ## Core Concepts
 
-- **Repository** — owns data access for one aggregate root. Receives a Prisma client (transactional or root) so queries participate in the active UoW transaction.
+- **Repository** — owns data access for one aggregate root. Injected via NestJS DI and uses `uow.transaction` for all queries (resolves to transactional client inside `do()`, root client outside).
 - **Unit of Work** — groups multiple repository operations into a single database transaction. Provided by `PrismaUnitOfWork.do()`.
+- **Aggregate root** — the top-level entity that repositories manage (Product, Order, OrderItem, User in the example). Each gets its own repository interface and implementation.
 - **No base class** — `@feneto/nestjs-prisma-uow` does **not** ship an abstract base repository. Each repository is a plain class written by the consumer.
+
+## Why This Library?
+
+Without a UoW abstraction, coordinating writes across multiple repositories requires careful transaction management. With `@feneto/nestjs-prisma-uow`:
+
+- **The service defines the transaction boundary** — one `uow.do()` wraps all aggregate writes.
+- **Repositories stay "dumb"** — they just use `this.uow.transaction` and participate automatically in the active transaction.
+- **Full DI compatibility** — repositories are standard NestJS `@Injectable()` providers. No `new Repository(tx)` anti-pattern inside callbacks.
+- **ALS isolation** — concurrent requests each get their own isolated transaction, even with singleton providers.
 
 ## Pattern
 
-The repository takes a `PrismaClient` in its constructor. When called from inside `uow.do()`, the transactional client is passed so all writes and reads see a consistent snapshot.
+### 1. Define a domain entity
+
+Pure domain object — no ORM annotations, no infrastructure dependencies:
 
 ```ts
+// domain/orders/order.entity.ts
+export class Order {
+  private _items: OrderItem[] = [];
+
+  constructor(
+    public readonly id: number,
+    public readonly customer: string,
+    public readonly email: string,
+    public readonly createdAt: Date,
+  ) {}
+
+  get items(): ReadonlyArray<OrderItem> { return this._items; }
+  addItem(item: OrderItem): void { this._items.push(item); }
+}
+```
+
+### 2. Define a repository interface (domain layer contract)
+
+```ts
+// domain/orders/i-order.repository.ts
+export interface IOrderRepository {
+  save(customer: string, email: string): Promise<Order>;
+  findById(id: number): Promise<Order | null>;
+  findByCustomer(customer: string): Promise<Order[]>;
+}
+```
+
+### 3. Implement in the infrastructure layer
+
+The repository injects `PrismaUnitOfWork<PrismaClient>` and calls `this.uow.transaction` for all Prisma operations. It maps Prisma models to domain entities at the boundary:
+
+```ts
+// infrastructure/repositories/orders.repository.ts
+import { Injectable } from '@nestjs/common';
+import { PrismaUnitOfWork } from '@feneto/nestjs-prisma-uow';
 import type { PrismaClient } from '@prisma/client';
+import { Order } from '../../domain/orders/order.entity';
 
-export class OrdersRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+@Injectable()
+export class OrdersRepository implements IOrderRepository {
+  constructor(private readonly uow: PrismaUnitOfWork<PrismaClient>) {}
 
-  async createOrder(params: {
-    customer: string;
-    email: string;
-    items: { product: string; quantity: number; price: number }[];
-  }): Promise<{ id: number }> {
-    return this.prisma.order.create({
-      data: {
-        customer: params.customer,
-        email: params.email,
-        items: {
-          create: params.items,
-        },
-      },
-      select: { id: true },
+  async save(customer: string, email: string): Promise<Order> {
+    const client = this.uow.transaction;
+    const result = await client.order.create({
+      data: { customer, email },
     });
+    return new Order(result.id, result.customer, result.email, result.createdAt);
   }
 
-  async findOrderById(id: number) {
-    return this.prisma.order.findUnique({
-      where: { id },
-      include: { items: true },
-    });
+  async findById(id: number): Promise<Order | null> {
+    const client = this.uow.transaction;
+    const result = await client.order.findUnique({ where: { id } });
+    if (!result) return null;
+    return new Order(result.id, result.customer, result.email, result.createdAt);
   }
 }
 ```
 
-The service orchestrates repository calls inside a Unit of Work:
+### 4. Orchestrate cross-aggregate writes in the service
+
+The service (application layer) injects multiple repositories AND the Unit of Work. It calls `uow.do()` to start a transaction, and all repo operations inside it share the same transactional client.
 
 ```ts
-import { Injectable } from '@nestjs/common';
+// application/services/orders.service.ts
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaUnitOfWork } from '@feneto/nestjs-prisma-uow';
 import type { PrismaClient } from '@prisma/client';
-import { OrdersRepository } from './orders.repository';
+import { OrdersRepository } from '../../infrastructure/repositories/orders.repository';
+import { OrderItemsRepository } from '../../infrastructure/repositories/order-items.repository';
+import { ProductsRepository } from '../../infrastructure/repositories/products.repository';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly uow: PrismaUnitOfWork<PrismaClient>) {}
+  constructor(
+    private readonly orderRepo: OrdersRepository,
+    private readonly itemRepo: OrderItemsRepository,
+    private readonly productRepo: ProductsRepository,
+    private readonly uow: PrismaUnitOfWork<PrismaClient>,
+  ) {}
 
-  async createOrder(dto: CreateOrderDto): Promise<{ id: number }> {
-    return this.uow.do(async (tx) => {
-      const repo = new OrdersRepository(tx);
-      const order = await repo.createOrder(dto);
+  async createOrder(dto: CreateOrderDto): Promise<Order> {
+    // 1. Validate products exist (cross-aggregate read — outside transaction)
+    const productNames = [...new Set(dto.items.map(i => i.product))];
+    const existing = await this.productRepo.findByNames(productNames);
+    const existingNames = new Set(existing.map(p => p.name));
+    const missing = productNames.filter(n => !existingNames.has(n));
+    if (missing.length > 0) {
+      throw new BadRequestException(`Products not found: ${missing.join(', ')}`);
+    }
 
-      // You can create additional repositories that share the same tx:
-      // const auditRepo = new AuditRepository(tx);
-      // await auditRepo.log('OrderCreated', order.id);
-
+    // 2. Create order + items atomically inside one transaction
+    return this.uow.do(async () => {
+      const order = await this.orderRepo.save(dto.customer, dto.email);
+      await this.itemRepo.createItems(order.id, dto.items);
       return order;
     });
   }
 
-  // Read-only operations can use the root client (no transaction overhead):
-  async findOrderById(id: number) {
-    const repo = new OrdersRepository(this.uow.transaction);
-    return repo.findOrderById(id);
+  // Read-only operations use repos outside do() — no transaction overhead:
+  async findOrderById(id: number): Promise<Order | null> {
+    return this.orderRepo.findById(id);
   }
 }
 ```
 
-## Transaction flow
+### 5. Wire up modules
+
+The presentation module imports all repository providers and the service:
+
+```ts
+// presentation/orders.module.ts
+@Module({
+  providers: [
+    OrdersService,
+    OrdersRepository,
+    OrderItemsRepository,
+    ProductsRepository,
+  ],
+  controllers: [OrdersController],
+})
+export class OrdersModule {}
+
+// app.module.ts
+@Module({
+  imports: [
+    PrismaModule,
+    PrismaUnitOfWorkModule.forRoot({
+      imports: [PrismaModule],
+      transactionOptions: { timeout: 5000 },
+    }),
+    OrdersModule,
+  ],
+})
+export class AppModule {}
+```
+
+## Transaction flow (cross-aggregate)
 
 ```
-Service.createOrder()
-  └── uow.do(fn)
+OrdersService.createOrder(dto)
+  └── uow.do(callback)
         └── Prisma.$transaction starts
-              └── fn(tx)                  ← ALS stores tx
-                    ├── new OrdersRepository(tx).createOrder(dto)
-                    │     └── tx.order.create(...)
-                    ├── new AuditRepository(tx).log(...)
-                    │     └── tx.audit.create(...)
-                    └── return result
-        ← Prisma.$transaction commits
+              └── ALS stores transactional client (tx)
+                    ├── orderRepo.save(customer, email)
+                    │     └── this.uow.transaction → tx
+                    │           └── tx.order.create(...)
+                    │           └── return new Order(...)  ← maps to domain entity
+                    ├── itemRepo.createItems(orderId, items)
+                    │     └── this.uow.transaction → tx  (same tx!)
+                    │           └── tx.orderItem.createMany(...)
+                    └── return order
+        ← Prisma.$transaction commits or rolls back
 ```
 
-If any step throws, Prisma rolls back the entire transaction.
+If any step throws, Prisma rolls back the entire transaction — including writes from all involved repositories.
+
+## Extending to More Aggregates
+
+The pattern scales naturally. To add a `Product` validation before creating an order:
+
+```ts
+// products.repository.ts
+@Injectable()
+export class ProductsRepository implements IProductRepository {
+  constructor(private readonly uow: PrismaUnitOfWork<PrismaClient>) {}
+
+  async findByIds(ids: number[]): Promise<Product[]> {
+    return this.uow.transaction.product.findMany({
+      where: { id: { in: ids } },
+    });
+  }
+}
+```
+
+Then inject it into the service alongside other repos:
+
+```ts
+constructor(
+  private readonly orderRepo: OrdersRepository,
+  private readonly itemRepo: OrderItemsRepository,
+  private readonly productRepo: ProductsRepository,  // new aggregate
+  private readonly uow: PrismaUnitOfWork<PrismaClient>,
+) {}
+
+async createOrder(dto: CreateOrderDto) {
+  // Validate products exist (read — outside transaction)
+  const products = await this.productRepo.findByIds(dto.productIds);
+  if (products.length !== dto.productIds.length) {
+    throw new BadRequestException('Some products not found');
+  }
+
+  // Atomically create order + items
+  return this.uow.do(async () => {
+    const order = await this.orderRepo.save(dto.customer, dto.email);
+    await this.itemRepo.createItems(order.id, dto.items);
+    return order;
+  });
+}
+```
+
+Each aggregate root (Product, Order, OrderItem, User) follows the same pattern: interface → DI-injected implementation → service orchestration with UoW.
 
 ## Transaction Options
 
@@ -123,9 +257,8 @@ Override options for a specific `do()` call. Per-call options only apply when a 
 
 ```ts
 await uow.do(
-  async (tx) => {
-    // This transaction gets a 2-second timeout
-    await tx.user.create({ data: { name: 'Alice' } });
+  async () => {
+    await orderRepo.createOrder(dto);
   },
   { timeout: 2000 },
 );
@@ -136,31 +269,30 @@ await uow.do(
 Calling `do()` inside another `do()` callback reuses the existing transaction. No new `$transaction` is opened:
 
 ```ts
-await uow.do(async (tx) => {
-  // Outer: starts a new transaction
-  await uow.do(async (innerTx) => {
-    // Inner: reuses the same tx — innerTx === tx
-    await tx.order.create({ data: { ... } });
+await uow.do(async () => {
+  await orderRepo.createOrder(dto1);   // shares tx
+
+  await uow.do(async () => {
+    await orderRepo.createOrder(dto2); // same tx — no new transaction
   });
-  // Both operations committed (or rolled back) together
+
+  // Both orders committed or rolled back together
 });
 ```
 
 ## `transaction` getter
 
-- **Inside `do()`:** returns the active transactional client (the `tx` argument).
+- **Inside `do()`:** returns the active transactional client.
 - **Outside `do()`:** returns the root Prisma client (no transaction active).
-
-This is useful for read-only queries or operations that do not need a transaction:
 
 ```ts
 // Inside a transaction → transactional client
-await uow.do(async (tx) => {
-  const client = this.uow.transaction; // same as tx
+await uow.do(async () => {
+  const client = this.uow.transaction; // the transactional Prisma client
 });
 
 // Outside → root client
-const client = this.uow.transaction; // the PrismaClient instance
+const client = this.uow.transaction; // the root PrismaClient instance
 ```
 
 ## ALS isolation
@@ -174,7 +306,7 @@ const client = this.uow.transaction; // the PrismaClient instance
 ```ts
 // These two calls run concurrently without interfering:
 await Promise.all([
-  uow.do(async (tx1) => { /* tx1 isolated */ }),
-  uow.do(async (tx2) => { /* tx2 isolated */ }),
+  uow.do(async () => { /* isolated tx 1 */ }),
+  uow.do(async () => { /* isolated tx 2 */ }),
 ]);
 ```
